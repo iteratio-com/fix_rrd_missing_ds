@@ -5,7 +5,9 @@ Fixes missing DS records of RRD files by comparing metrics DS count with DS coun
 
 Using python-rrdtool which comes with CheckMK to analyze and add missing DS records.
 
-Usage: fix_rrd_missing_ds.py [-h] [-v] [--force] [--debug] [--rrdfile RRDFILE]
+Usage: 
+
+        fix_rrd_missing_ds.py [-h] [-v] [--force] [--debug] [--rrdfile RRDFILE]
 
 Optional arguments:
 

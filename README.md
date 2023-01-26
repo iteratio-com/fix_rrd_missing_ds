@@ -16,3 +16,5 @@ Optional arguments:
         --force            Apply changes, .bak files will be created but still handle with care!
         --debug            Enable debugging level in logging
         --rrdfile RRDFILE  Single RRD file to process
+
+Disclaimer: This tool comes without warranty, use at your own risk.

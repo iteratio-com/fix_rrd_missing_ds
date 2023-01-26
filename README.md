@@ -7,16 +7,10 @@ Using python-rrdtool which comes with CheckMK to analyze and add missing DS reco
 
 Usage: fix_rrd_missing_ds.py [-h] [-v] [--force] [--debug] [--rrdfile RRDFILE]
 
+Optional arguments:
 
-
-optional arguments:
-
-  -h, --help         show this help message and exit
-
-  -v                 Enable verbose output
-
-  --force            Apply changes, .bak files will be created but still handle with care!
-
-  --debug            Enable debugging level in logging
-
-  --rrdfile RRDFILE  Single RRD file to process
+        -h, --help         show this help message and exit
+        -v                 Enable verbose output
+        --force            Apply changes, .bak files will be created but still handle with care!
+        --debug            Enable debugging level in logging
+        --rrdfile RRDFILE  Single RRD file to process

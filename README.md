@@ -17,10 +17,13 @@ Optional arguments:
         --debug            Enable debugging level in logging
         --rrdfile RRDFILE  Single RRD file to process
 
-A logfile will be created at $OMD_ROOT/var/log/fix_rrd_missing_ds_records.log
+A logfile will be created at 
+        
+        $OMD_ROOT/var/log/fix_rrd_missing_ds_records.log
 
 Changelog
-1.0 Initial release
-1.1 Added some counters
+
+        1.0 Initial release
+        1.1 Added some counters
 
 Disclaimer: This tool comes without warranty, use at your own risk.

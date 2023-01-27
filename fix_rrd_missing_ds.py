@@ -22,7 +22,7 @@ logging.basicConfig(
 
 
 def parse_arguments(argv=None):
-    defaults = (('rrdfile', None, 'Single RRD file to process'),)
+    defaults = (('rrdfile', None, 'Single RRD file to process - absolute path needed'),)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("-v", action="store_true", help="Enable verbose output")
     parser.add_argument(

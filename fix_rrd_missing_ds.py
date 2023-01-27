@@ -7,23 +7,28 @@ import re
 import shutil
 import argparse
 import logging
-
-# Logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(funcName)s - %(levelname)s - %(message)s',
-    filename=f"{os.environ['OMD_ROOT']}/var/log/fix_rrd_missing_ds_records.log",
-)
+import time
 
 # Folders
 BASEDIR = os.environ.get('OMD_ROOT')
 RRDDIR = BASEDIR + "/var/check_mk/rrd/"
 
+# Logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(funcName)s - %(levelname)s - %(message)s',
+    filename=f"{BASEDIR}/var/log/fix_rrd_missing_ds_records.log",
+)
+
+
 def parse_arguments(argv=None):
     defaults = (('rrdfile', None, 'Single RRD file to process'),)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("-v", action="store_true", help="Enable verbose output")
-    parser.add_argument("--force", action="store_true", help="Apply changes, .bak files will be created but still handle with care!")
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Apply changes, .bak files will be created but still handle with care!")
     parser.add_argument("--debug", action="store_true", help="Enable debugging level in logging")
     opt_with_help = (t for t in defaults if len(t) == 3)
     for key, default, help_string in opt_with_help:
@@ -35,7 +40,10 @@ def parse_arguments(argv=None):
 
 
 def main(argv=None):
+    starttime = time.time()
     rrdfiles = []
+    missingds_total = 0
+    corrupt_rrd_files = 0
     single = False
     args = parse_arguments(argv)
     logger = logging.getLogger()
@@ -44,7 +52,7 @@ def main(argv=None):
         s = logging.StreamHandler()
         logger.addHandler(s)
 
-    logger.info("-"*80)
+    logger.info("-" * 80)
 
     if args.debug:
         logger.setLevel(logging.DEBUG)
@@ -90,7 +98,7 @@ def main(argv=None):
         rrdfilecontent = rrdtool.info(rrdfile)
         for k, v, in rrdfilecontent.items():
             if k.startswith('ds['):
-                ds = int(k.split(".")[0].replace("ds[","").replace("]",""))
+                ds = int(k.split(".")[0].replace("ds[", "").replace("]", ""))
                 if ds not in dslist:
                     dslist.append(ds)
 
@@ -102,12 +110,15 @@ def main(argv=None):
 
             if force == True:
                 backupfile = re.sub("rrd$", "bak", rrdfile)
-                logger.info(f"Backing up for {rrdhost} {os.path.basename(rrdfile)} to {os.path.basename(backupfile)}")
-                shutil.copyfile(rrdfile,backupfile)
+                logger.info(
+                    f"Backing up for {rrdhost} {os.path.basename(rrdfile)} to {os.path.basename(backupfile)}"
+                )
+                shutil.copyfile(rrdfile, backupfile)
 
             for ds in range(dslist[0], dslist[-1] + 1):
                 if ds not in dslist:
                     missingds.append(ds)
+                    missingds_total += 1
                     if force == True:
                         rrdtool.tune(rrdfile, f'DS:{ds}:GAUGE:8460:0:U')
                     logger.info(f"rrdtool tune {rrdfile} DS:{ds}:GAUGE:8460:0:U")
@@ -119,11 +130,19 @@ def main(argv=None):
                 for ds in range(dslist[0], dslist[-1] + 1):
                     if ds not in dslist:
                         missingds.append(ds)
+                        missingds_total += 1
                         if force == True:
                             rrdtool.tune(rrdfile, f'DS:{ds}:GAUGE:8460:0:U')
                         logger.info(f"rrdtool tune {rrdfile} DS:{ds}:GAUGE:8460:0:U")
+            corrupt_rrd_files += 1
         else:
-            logger.debug(f"RRD file {rrdhost}/{os.path.basename(rrdfile)} has same count of DS in info file, no reparation needed")
+            logger.debug(
+                f"RRD file {rrdhost}/{os.path.basename(rrdfile)} has same count of DS in info file, no fix needed"
+            )
+
+    logger.info(
+        f"Done: Processed total {missingds_total} DS records in {corrupt_rrd_files} corrupt RRD files in {round(time.time() - starttime,2)} seconds"
+    )
 
 
 main()
